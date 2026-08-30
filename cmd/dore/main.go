@@ -1,11 +1,13 @@
 // Command dore is the Doré compiler.
 //
-// Only `dore check` exists so far: it parses and validates specs without
-// involving a model. That is deliberate — the verification machinery has to be
-// trustworthy before generation is worth building on top of it.
+// Two commands exist so far. `check` parses and validates specs; `assay` runs
+// a touchstone against a hand-written implementation. Neither involves a model.
+// That is deliberate — the verification machinery has to be trustworthy before
+// generation is worth building on top of it.
 package main
 
 import (
+	"context"
 	"flag"
 	"fmt"
 	"io"
@@ -13,7 +15,10 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/christopherwolf/dore/internal/assay"
 	"github.com/christopherwolf/dore/internal/ast"
+	"github.com/christopherwolf/dore/internal/backend"
+	"github.com/christopherwolf/dore/internal/backend/python"
 	"github.com/christopherwolf/dore/internal/check"
 	"github.com/christopherwolf/dore/internal/diag"
 	"github.com/christopherwolf/dore/internal/source"
@@ -23,11 +28,16 @@ import (
 const usage = `dore — a specification language that compiles by assay
 
 usage:
-  dore check <file.dore>...   parse and validate specs (no model involved)
+  dore check <file.dore>...              parse and validate specs
+  dore assay <file.dore> --impl <file>   run the touchstone against an implementation
   dore version
 
+No model is involved in either command.
+
 flags:
-  --no-color   disable colored diagnostics
+  --no-color        disable colored output
+  --impl <file>     implementation to assay (assay only)
+  --keep-harness    leave the generated harness on disk (assay only)
 `
 
 // Exit codes are the CLI's contract with CI, so they are named rather than
@@ -53,6 +63,8 @@ func run(args []string, stdout, stderr io.Writer) int {
 	switch args[0] {
 	case "check":
 		return runCheck(args[1:], stdout, stderr)
+	case "assay":
+		return runAssay(args[1:], stdout, stderr)
 	case "version":
 		fmt.Fprintln(stdout, "dore 0.0.1-dev")
 		return exitOK
@@ -126,6 +138,88 @@ func runCheck(args []string, stdout, stderr io.Writer) int {
 		return exitDiags
 	}
 	fmt.Fprintf(stdout, "ok  %s\n", summary(frozen, live, rows, len(paths)))
+	return exitOK
+}
+
+func runAssay(args []string, stdout, stderr io.Writer) int {
+	fs := flag.NewFlagSet("assay", flag.ContinueOnError)
+	fs.SetOutput(stderr)
+	impl := fs.String("impl", "", "implementation file to assay")
+	noColor := fs.Bool("no-color", false, "disable colored output")
+	keep := fs.Bool("keep-harness", false, "leave the generated harness on disk")
+
+	var flags, paths []string
+	for i := 0; i < len(args); i++ {
+		a := args[i]
+		if strings.HasPrefix(a, "-") {
+			flags = append(flags, a)
+			// --impl takes a value; keep it with its flag.
+			if (a == "--impl" || a == "-impl") && i+1 < len(args) {
+				i++
+				flags = append(flags, args[i])
+			}
+			continue
+		}
+		paths = append(paths, a)
+	}
+	if err := fs.Parse(flags); err != nil {
+		return exitUsage
+	}
+
+	if len(paths) != 1 {
+		fmt.Fprintln(stderr, "dore assay: expected exactly one .dore file")
+		return exitUsage
+	}
+	if *impl == "" {
+		fmt.Fprintln(stderr, "dore assay: --impl is required\n\nusage: dore assay <file.dore> --impl <implementation>")
+		return exitUsage
+	}
+	if _, err := os.Stat(*impl); err != nil {
+		fmt.Fprintf(stderr, "dore: %v\n", err)
+		return exitUsage
+	}
+
+	specPath := paths[0]
+	if filepath.Ext(specPath) != ".dore" {
+		fmt.Fprintf(stderr, "dore: %s: expected a .dore file\n", specPath)
+		return exitUsage
+	}
+	f, err := source.Load(specPath)
+	if err != nil {
+		fmt.Fprintf(stderr, "dore: %v\n", err)
+		return exitUsage
+	}
+
+	// The spec gates the implementation, so an invalid spec is not something to
+	// assay around. Running anyway would report failures the spec never meant.
+	file, bag := syntax.Parse(f)
+	bag.Merge(check.File(file))
+	color := !*noColor && os.Getenv("NO_COLOR") == "" && isTerminal(stderr)
+	if bag.HasErrors() {
+		diag.Style{Color: color}.RenderAll(stderr, bag)
+		return exitDiags
+	}
+
+	var be backend.Backend
+	switch ext := filepath.Ext(*impl); ext {
+	case ".py":
+		be = python.Backend{}
+	default:
+		fmt.Fprintf(stderr, "dore: no backend for %s files\n", ext)
+		return exitUsage
+	}
+
+	rep, err := assay.Run(context.Background(), file, specPath, *impl,
+		assay.Options{Backend: be, KeepHarness: *keep})
+	if err != nil {
+		fmt.Fprintf(stderr, "dore: %v\n", err)
+		return exitUsage
+	}
+
+	assay.Renderer{Color: color}.Render(stdout, rep)
+	if !rep.Passed() {
+		return exitDiags
+	}
 	return exitOK
 }
 

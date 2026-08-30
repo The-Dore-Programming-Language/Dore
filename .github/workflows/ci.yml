@@ -1,0 +1,49 @@
+name: CI
+
+# Runs on every push and pull request. Required checks are configured in branch
+# protection; this workflow only reports.
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+# Read-only by default. A workflow that cannot write cannot be turned into a
+# way to modify the repository by someone who opens a pull request.
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.25'
+          cache: true
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Formatting
+        run: |
+          unformatted=$(gofmt -l .)
+          if [ -n "$unformatted" ]; then
+            echo "gofmt needed on:"; echo "$unformatted"; exit 1
+          fi
+
+      - name: Vet
+        run: go vet ./...
+
+      - name: Test
+        run: go test ./... -count=1
+
+      - name: Assay the examples
+        run: |
+          go build -o dore ./cmd/dore
+          ./dore check examples/*.dore
+          ./dore assay examples/refunds.dore --impl examples/refunds.py --no-color

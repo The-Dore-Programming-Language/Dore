@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strings"
 	"testing"
@@ -121,5 +122,72 @@ func write(t *testing.T, path, content string) {
 	t.Helper()
 	if err := os.WriteFile(path, []byte(content), 0o644); err != nil {
 		t.Fatal(err)
+	}
+}
+
+// dore assay exits 0 when every row passes and 1 when any row fails, so CI can
+// gate on it the same way it gates on dore check.
+func TestAssayExitCodes(t *testing.T) {
+	if _, err := exec.LookPath("python3"); err != nil {
+		t.Skip("python3 not on PATH")
+	}
+	dir := t.TempDir()
+	spec := filepath.Join(dir, "spec.dore")
+	good := filepath.Join(dir, "good.py")
+	bad := filepath.Join(dir, "bad.py")
+
+	write(t, spec, `frozen fn double(n: int) -> out: int
+  examples:
+    | n | out |
+    | 2 | 4   |
+    | 3 | 6   |
+`)
+	write(t, good, "def double(n):\n    return n * 2\n")
+	write(t, bad, "def double(n):\n    return n + 2\n")
+
+	tests := []struct {
+		name string
+		args []string
+		want int
+	}{
+		{"passing implementation", []string{"assay", spec, "--impl", good, "--no-color"}, exitOK},
+		{"failing implementation", []string{"assay", spec, "--impl", bad, "--no-color"}, exitDiags},
+		{"missing --impl", []string{"assay", spec}, exitUsage},
+		{"missing spec", []string{"assay", "--impl", good}, exitUsage},
+	}
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			var out, errOut bytes.Buffer
+			if got := run(tc.args, &out, &errOut); got != tc.want {
+				t.Errorf("run(%v) = %d, want %d\nstdout: %s\nstderr: %s",
+					tc.args, got, tc.want, out.String(), errOut.String())
+			}
+		})
+	}
+}
+
+// A spec that does not check must not be assayed: running an implementation
+// against an invalid oracle would report failures the spec never meant.
+func TestAssayRefusesAnInvalidSpec(t *testing.T) {
+	dir := t.TempDir()
+	spec := filepath.Join(dir, "spec.dore")
+	impl := filepath.Join(dir, "impl.py")
+	write(t, spec, `frozen fn double(n: int) -> out: int
+  examples:
+    | n | out   |
+    | 2 | maybe |
+`)
+	write(t, impl, "def double(n):\n    return n * 2\n")
+
+	var out, errOut bytes.Buffer
+	code := run([]string{"assay", spec, "--impl", impl, "--no-color"}, &out, &errOut)
+	if code != exitDiags {
+		t.Errorf("exit = %d, want %d", code, exitDiags)
+	}
+	if !strings.Contains(errOut.String(), "E0107") {
+		t.Errorf("should report the spec error, got: %s", errOut.String())
+	}
+	if strings.Contains(out.String(), "rows") {
+		t.Errorf("should not have run the assay, got: %s", out.String())
 	}
 }
