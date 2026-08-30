@@ -1,0 +1,8 @@
+note[N0001]: examples on live function `intent_of` are an evaluation, not a gate
+ ┌─ testdata/live_note.dore:4:3
+  │
+4 │   examples:
+  │   ^^^^^^^^^ reported as a pass rate
+  │
+  = help: a live function calls a model at runtime, so its behavior cannot be frozen. These rows will be scored, not enforced
+

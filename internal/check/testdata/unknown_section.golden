@@ -1,0 +1,9 @@
+error[E0017]: unknown section `wibble`
+ ┌─ testdata/unknown_section.dore:2:3
+  │
+2 │   wibble:
+  │   ^^^^^^^ not a section Doré recognizes
+  │
+  = help: sections are `intent:`, `examples:`, `scenario "...":`, and `property name:`
+
+failed: 1 error(s)

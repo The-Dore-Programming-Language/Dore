@@ -1,0 +1,20 @@
+error[E0106]: table is missing a column
+ ┌─ testdata/unknown_column.dore:3:7
+  │
+3 │     | days | totl  | approved |
+  │       ^^^^ no column for `total`
+  │
+1 │ frozen fn refund_eligible(days: int, total: money) -> approved: bool
+  │ -------------------------------------------------------------------- signature declares them here
+  │
+  = help: every input and the result need a column; a row that leaves one unspecified cannot be run
+
+error[E0105]: column `totl` matches no input or result
+ ┌─ testdata/unknown_column.dore:3:14
+  │
+3 │     | days | totl  | approved |
+  │              ^^^^ unknown column
+  │
+  = help: did you mean `total`? Columns bind by name to the signature, and `note` is reserved for free text
+
+failed: 2 error(s)

@@ -1,0 +1,17 @@
+error[E0009]: expected `->` and a named result
+ ┌─ testdata/malformed_signature.dore:1:1
+  │
+1 │ frozen fn missing_arrow(a: int)
+  │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ a Doré function must name its output
+  │
+  = help: naming the result is what lets a touchstone column refer to it, as in `-> approved: bool`
+
+error[E0011]: the result needs a name, not just a type
+ ┌─ testdata/malformed_signature.dore:6:37
+  │
+6 │ frozen fn unnamed_result(a: int) -> bool
+  │                                     ^^^^ `bool` is a type
+  │
+  = help: write `-> result_name: bool` — touchstone columns refer to the result by name, so it has to have one
+
+failed: 2 error(s)

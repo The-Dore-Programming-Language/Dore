@@ -1,0 +1,27 @@
+error[E0108]: duplicate property `positive_stays_true`
+  ┌─ testdata/properties.dore:10:3
+   │
+10 │   property positive_stays_true:
+   │   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ redeclared here
+   │
+ 7 │   property positive_stays_true:
+   │   ----------------------------- first declared here
+   │
+
+error[E0023]: property needs a name
+  ┌─ testdata/properties.dore:13:3
+   │
+13 │   property:
+   │   ^^^^^^^^^ expected a name before `:`
+   │
+   = help: write `property over_limit_never_approved:` — the name appears when the property fails
+
+error[E0024]: property `never_checked` has no body
+  ┌─ testdata/properties.dore:16:3
+   │
+16 │   property never_checked:
+   │   ^^^^^^^^^^^^^^^^^^^^^^^ nothing to check
+   │
+   = help: write a condition, like `forall order_total > 500.00 -> approved is false`
+
+failed: 3 error(s)

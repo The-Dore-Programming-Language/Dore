@@ -1,0 +1,9 @@
+error[E0002]: expected a declaration
+ ┌─ testdata/bad_header.dore:6:1
+  │
+6 │ this line is not a declaration
+  │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ not a `frozen fn` or `live fn`
+  │
+  = help: a Doré file holds function declarations; each starts with `frozen fn` or `live fn`
+
+failed: 1 error(s)

@@ -1,0 +1,12 @@
+error[E0107]: cell does not match declared type `float`
+ ┌─ testdata/float_output.dore:4:15
+  │
+4 │     | 1 | 3 | 0.3333 |
+  │               ^^^^^^ float output cell needs a tolerance
+  │
+3 │     | a | b | r      |
+  │               - column `r` is float
+  │
+  = help: write `0.3333 ~1e-9` — exact float equality makes touchstones flaky. For money amounts, use the `money` type instead
+
+failed: 1 error(s)

@@ -1,0 +1,13 @@
+frozen fn before(a: int) -> out: bool
+  examples:
+    | a | out  |
+    | 1 | true |
+
+this line is not a declaration
+  and this indented content
+  belongs to nothing
+
+frozen fn after(a: int) -> out: bool
+  examples:
+    | a | out  |
+    | 2 | true |

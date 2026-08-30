@@ -1,0 +1,8 @@
+frozen fn refund_eligible(days_since_purchase: int, order_total: money) -> approved: bool
+  intent:
+    Refunds are approved within 30 days of purchase.
+  examples:
+    | days_since_purchase | order_total | approved | note                |
+    | 5                   | 49.99       | true     | ordinary            |
+    | 31                  | 49.99       | false    | boundary, exclusive |
+    | 5                   | 900.00      | false    | limit beats recency |

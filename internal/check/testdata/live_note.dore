@@ -1,0 +1,6 @@
+live fn intent_of(message: text) -> intent: text
+  intent:
+    Extract the customer's intent from a support message.
+  examples:
+    | message              | intent   |
+    | "where is my order"  | "status" |

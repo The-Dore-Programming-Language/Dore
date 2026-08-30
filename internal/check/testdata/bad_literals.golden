@@ -1,0 +1,23 @@
+error[E0107]: cell does not match declared type `money`
+ ┌─ testdata/bad_literals.dore:4:23
+  │
+4 │     | 10.00  | 0.5  | 15.000  |
+  │                       ^^^^^^ 15.000 has 3 decimal places, but the type allows 2
+  │
+3 │     | base   | rate | total   |
+  │                       ----- column `total` is money
+  │
+  = help: Doré will not round a literal you wrote; use a value the type can hold exactly
+
+error[E0107]: cell does not match declared type `money`
+ ┌─ testdata/bad_literals.dore:5:23
+  │
+5 │     | 10.00  | 0.5  | maybe   |
+  │                       ^^^^^ "maybe" is not a decimal literal
+  │
+3 │     | base   | rate | total   |
+  │                       ----- column `total` is money
+  │
+  = help: decimal literals look like `49.99` or `-100`
+
+failed: 2 error(s)

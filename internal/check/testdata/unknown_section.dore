@@ -1,0 +1,7 @@
+frozen fn f(a: int) -> out: bool
+  wibble:
+    content that should be skipped
+    along with this line
+  examples:
+    | a | out  |
+    | 1 | true |

@@ -1,0 +1,5 @@
+# Built binary
+/dore
+
+# Coverage output
+/cover.out

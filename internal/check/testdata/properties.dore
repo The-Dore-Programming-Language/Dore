@@ -1,0 +1,16 @@
+# Property blocks: valid, duplicated, unnamed, and empty.
+frozen fn f(a: int) -> out: bool
+  examples:
+    | a | out  |
+    | 1 | true |
+
+  property positive_stays_true:
+    forall a > 0 -> out is true
+
+  property positive_stays_true:
+    forall a > 100 -> out is true
+
+  property:
+    forall a > 0 -> out is true
+
+  property never_checked:

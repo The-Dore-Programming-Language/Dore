@@ -1,0 +1,6 @@
+frozen fn quote(base: money, rate: float) -> total: money
+  examples:
+    | base   | rate | total   |
+    | 10.00  | 0.5  | 15.000  |
+    | 10.00  | 0.5  | maybe   |
+    | 10.00  | 0.5  | 15.00   |

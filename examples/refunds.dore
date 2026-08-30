@@ -1,0 +1,27 @@
+frozen fn refund_eligible(
+  days_since_purchase: int,
+  order_total: money,
+) -> approved: bool
+
+  # Prose. Informs generation, never checked. Changing it does not
+  # invalidate an existing artifact.
+  intent:
+    Refunds are approved within 30 days of purchase.
+    Orders over 500.00 require manager sign-off and are never
+    auto-approved, however recent the purchase.
+
+  # The oracle. Typed literals only. This is what gates the build.
+  examples:
+    | days_since_purchase | order_total | approved | note                |
+    | 5                   | 49.99       | true     | ordinary            |
+    | 30                  | 49.99       | true     | boundary, inclusive |
+    | 31                  | 49.99       | false    | boundary, exclusive |
+    | 5                   | 900.00      | false    | limit beats recency |
+
+  scenario "high-value orders always escalate":
+    | days_since_purchase | order_total | approved |
+    | 1                   | 500.01      | false    |
+    | 29                  | 5000.00     | false    |
+
+  property over_limit_never_approved:
+    forall order_total > 500.00 -> approved is false

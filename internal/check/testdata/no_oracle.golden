@@ -1,0 +1,9 @@
+error[E0101]: frozen function `tone_of` has no examples
+ ┌─ testdata/no_oracle.dore:2:11
+  │
+2 │ frozen fn tone_of(message: text) -> tone: text
+  │           ^^^^^^^ nothing verifies this function
+  │
+  = help: a frozen function is compiled once and verified against its examples; without them there is nothing to gate generation. Add an `examples:` block, or declare it `live fn` if the behavior is genuinely fuzzy
+
+failed: 1 error(s)

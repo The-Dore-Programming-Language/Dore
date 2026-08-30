@@ -1,0 +1,4 @@
+frozen fn refund_eligible(days: int, total: money) -> approved: bool
+  examples:
+    | days | totl  | approved |
+    | 5    | 49.99 | true     |

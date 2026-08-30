@@ -1,0 +1,14 @@
+frozen fn missing_arrow(a: int)
+  examples:
+    | a | out  |
+    | 1 | true |
+
+frozen fn unnamed_result(a: int) -> bool
+  examples:
+    | a | out  |
+    | 1 | true |
+
+frozen fn ok(a: int) -> out: bool
+  examples:
+    | a | out  |
+    | 1 | true |

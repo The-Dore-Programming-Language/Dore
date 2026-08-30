@@ -1,0 +1,4 @@
+# The central rule: no oracle, no freeze.
+frozen fn tone_of(message: text) -> tone: text
+  intent:
+    Classify the tone of a customer message.
