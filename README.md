@@ -7,9 +7,11 @@ comes off a mine floor. It is ninety-odd percent precious metal already: all the
 value is there, none of it is certified. You write Doré, and the compiler refines
 it into verified, frozen, ordinary code.
 
-> **Status: design phase.** Nothing here is implemented yet. This document is the
-> intended direction; where the code and this document disagree, this document is
-> the plan and the code is behind.
+> **Status: early.** The front end works — `dore check` parses and validates
+> specs, and `dore assay` runs a touchstone against a hand-written
+> implementation. No model is involved in either. Code generation, the cupel,
+> and the cache are not built yet. Where this document and the code disagree,
+> the code is behind and this document is the plan.
 
 ---
 
@@ -194,13 +196,16 @@ nowhere else. Tool verbs and artifacts are themed; language keywords stay plain.
 
 ## License and contribution
 
-Doré will be released under a permissive open-source license. A language nobody can
-fork, audit, or keep alive without its author is a language nobody should build on.
+Doré is licensed under **Apache License 2.0** — see [LICENSE](LICENSE). A language
+nobody can fork, audit, or keep alive without its author is a language nobody should
+build on. Apache-2.0 rather than MIT for the explicit patent grant, which matters
+when the thing you are producing is code other people ship.
 
 Design decisions are made by the maintainers and are not open to contribution while
 the language is pre-1.0 — design coherence is the scarcest resource an early language
 has. Bug reports, failing touchstones, host-language backends, editor integrations,
-and documentation are all welcome.
+and documentation are all welcome. See [CONTRIBUTING.md](CONTRIBUTING.md).
 
 **Code that Doré generates belongs to you, unencumbered.** The compiler's license does
-not reach its output.
+not reach its output — no attribution, no notice, no terms. This is stated explicitly
+in [NOTICE](NOTICE) so it is a promise on the record rather than an assumption.

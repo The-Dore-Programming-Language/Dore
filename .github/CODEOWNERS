@@ -1,0 +1,4 @@
+# Every file requires review from the repository owner. Combined with branch
+# protection's "require review from Code Owners", this is what makes it
+# impossible for a change to merge without explicit approval.
+* @wolfchristopher
